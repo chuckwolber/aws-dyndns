@@ -32,27 +32,23 @@ EOF
     exit 1
 }
 
+MIN_ARGS=4
 DNS_FQDN=
 DNS_TTL=
 AWS_ZONE_ID=
 REFRESH_TIME=
 LOG_CMD=
 args() {
-    [[ "$#" -eq 4 ]] || usage
-
-    if [[ -r /etc/aws-dyndns.conf ]]; then
-        . /etc/aws-dyndns.conf
-    fi
-
-    if [[ -z "${LOG_CMD}" ]] ; then
-        LOG_CMD=echo
-    fi
+    [[ $# -ge ${MIN_ARGS} ]] || usage
+    [[ -r /etc/aws-dyndns.conf ]] && . /etc/aws-dyndns.conf
 
     # Command line arguments override configuration file.
     DNS_FQDN="$1"; shift
     DNS_TTL="$1"; shift
     AWS_ZONE_ID="$1"; shift
     REFRESH_TIME="$1"; shift
+    [[ -n "${1:-}" ]] && LOG_CMD="$1" && shift # Optional
+    [[ -z "${LOG_CMD}" ]] && LOG_CMD="echo"    # Fallback
 }
 
 validate_ip() {
